@@ -1,0 +1,88 @@
+---
+title: "Toolik Station Air Temperature"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(skimr)
+```
+
+## Read in the Toolik Lake meteorologic data
+
+**Data:** Shaver, G. 2019. A multi-year DAILY weather file for the Toolik Field Station at Toolik Lake, AK starting 1988 to present. ver 4. Environmental Data Initiative. https://doi.org/10.6073/pasta/ce0f300cdf87ec002909012abefd9c5c (Accessed 2021-08-08).
+
+The data are stored in the `data-raw` subfolder. We'll use `here::here()` to point to it, and read it in using the `readr::read_csv()` function from the `readr` package (part of the `tidyverse`). 
+
+```{r}
+toolik_weather <- read_csv(here::here("data", "data-raw", "toolik_weather.csv"))
+```
+
+
+- First: Look at the data you've read in (always always)
+
+- Second: What is that warning? `problems()` - line 6424
+
+- How does R assign classes to data it reads in? See: https://readr.tidyverse.org/articles/readr.html
+
+- Third: Are all missing values stored the same way? See: #N/A, and add a new argument within `readr`: na = "#N/A"
+
+
+## Basic exploration
+
+```{r}
+# An overview:
+skimr::skim(toolik_weather)
+
+# A few other things to explore
+dim(toolik_weather)
+names(toolik_weather)
+```
+
+## One awesome cleaning tool: {janitor}
+
+...and meet the pipe operator!
+
+I don't want to deal with those capital letters. These aren't even bad looking column names, but let's clean them up a bit. 
+
+```{r}
+toolik_weather <- toolik_weather %>% clean_names() # What does this do? Say it in words.
+
+# What is this %>% thing? Meet the pipe operator! Also, as of a couple months ago, |> is a native pipe operator (versus %>%, which comes along with the tidyverse)
+
+# Now what are the column names?
+```
+
+```{r}
+names(toolik_weather)
+```
+
+## Make a graph
+
+Let's make a jitterplot of temperatures by month. 
+
+
+```{r}
+toolik_temp_plot <- ggplot(data = toolik_weather, aes(x = as.factor(month), y = daily_air_temp_mean_c)) +
+  geom_jitter(aes(color = daily_air_temp_mean_c), show.legend = FALSE) +
+  scale_color_gradient(low = "blue", high = "orange") +
+  theme_minimal() +
+  labs(title = "Toolik Station daily air temperature",
+       x = "Month",
+       y = "Daily mean air temperatures (Celsius)")
+
+toolik_temp_plot
+```
+
+## Export a figure
+
+```{r}
+ggsave(here::here("figs", "toolik_temp_plot.png"), height = 6, width = 7)
+```
+
+Now try changing something about the ggplot code, and re-run your `ggsave()` line above. Does your saved figure change? Great! 
+
+## End Example 1
