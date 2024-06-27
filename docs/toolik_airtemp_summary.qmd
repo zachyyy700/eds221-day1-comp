@@ -1,7 +1,9 @@
 ---
 title: "Toolik Station Air Temperature"
-output: html_document
+format: html
+editor: visual
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
