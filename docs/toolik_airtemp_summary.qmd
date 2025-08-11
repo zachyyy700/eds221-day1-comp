@@ -47,7 +47,9 @@ names(toolik_weather)
 I don't want to deal with those capital letters. These aren't even bad looking column names, but let's clean them up a bit.
 
 ```{r}
-toolik_weather <- toolik_weather %>% clean_names() # What does this do? Say it in words.
+toolik_weather <- toolik_weather %>% 
+  clean_names() # What does this do? Say it in words.
+# clean_names(), a way to layer functions
 
 # What is this %>% thing? Meet the pipe operator! Also, as of a couple months ago, |> is a native pipe operator (versus %>%, which comes along with the tidyverse)
 
@@ -69,7 +71,8 @@ toolik_temp_plot <- ggplot(data = toolik_weather, aes(x = as.factor(month), y = 
   theme_minimal() +
   labs(title = "Toolik Station daily air temperature",
        x = "Month",
-       y = "Daily mean air temperatures (Celsius)")
+       y = "Daily mean air temperatures (Celsius)",
+       caption = "It gets quite cold in Toolik, Alaska")
 
 toolik_temp_plot
 ```
@@ -83,3 +86,49 @@ ggsave(here::here("figs", "toolik_temp_plot.png"), height = 6, width = 7)
 Now try changing something about the ggplot code, and re-run your `ggsave()` line above. Does your saved figure change? Great!
 
 ## End Example 1
+
+## Example 2
+Read in chlorophyll data
+```{r}
+toolik_chloro <- read_csv(here::here("data", "data-raw","toolik_chlorophyll.csv"))
+```
+
+Data Overview
+```{r}
+# skim dat
+skimr::skim(toolik_chloro)
+# dim dat
+dim(toolik_chloro)
+names(toolik_chloro)
+```
+
+```{r}
+# use janitor, clean up ugly ahhh names
+toolik_chloro <- toolik_chloro %>%
+  clean_names()
+
+names(toolik_chloro)
+```
+
+```{r}
+# replace missing values with NA. always check data.
+toolik_chloro$active_chl_a_ug_l <- na_if(toolik_chloro$active_chl_a_ug_l, ".")
+
+# change character data to numeric
+toolik_chloro$active_chl_a_ug_l <- as.numeric(toolik_chloro$active_chl_a_ug_l)
+```
+
+```{r}
+# plot dat jon
+toolik_chloro_plot <- ggplot(data = toolik_chloro, aes(x = depth, y = active_chl_a_ug_l)) +
+  geom_point() + 
+  labs(title = "Toolik Lake Chlorophyll a Concentration",
+       x = "Depth (m)", 
+       y = "Chlorophyll a Concentration (ug/L)") +
+  theme_minimal()
+toolik_chloro_plot
+
+# save plot
+ggsave(here::here("figs", "toolik_chloro_plot.png"), height = 6, width = 7)
+```
+
